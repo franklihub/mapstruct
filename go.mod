@@ -3,7 +3,7 @@ module gmapstruct
 go 1.18
 
 require (
-	github.com/franklihub/gtags v0.0.0-20220906081953-b0e04bc54665
+	gtags v0.0.0
 	github.com/gogf/gf v1.16.9
 	gotest.tools v2.2.0+incompatible
 )
@@ -20,3 +20,4 @@ require (
 	golang.org/x/text v0.3.6 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
+replace gtags => ./gtags

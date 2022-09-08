@@ -1,10 +1,9 @@
 package gmapstruct
 
 import (
+	"gtags"
 	"reflect"
 	"strings"
-
-	"github.com/franklihub/gtags"
 )
 
 func TidyMapDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any {
@@ -19,7 +18,7 @@ func tidyStructDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any 
 	for _, f := range stags.FieldNames() {
 		field := stags.FieldByName(f)
 		if v, ok := dmap[field.Alias()]; !ok {
-			dmap[field.Alias()] = field.Tags().Get(DefValTag)
+			dmap[field.Alias()] = field.Tags().Get(DefValTag).Val()
 		} else {
 			if _, ok := v.(string); ok {
 				dmap[field.Alias()] = strings.ToLower(v.(string))
@@ -29,7 +28,8 @@ func tidyStructDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any 
 	///scan nested
 	for _, f := range stags.NestedNames() {
 		nested := stags.NestedByName(f)
-		structname := nested.Name()
+		//todo: nested name
+		structname := nested.Alise()
 		////
 		if v, ok := dmap[structname]; ok {
 			d := tidyStructDefVal(nested, v.(map[string]any))

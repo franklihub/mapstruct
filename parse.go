@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"gtags"
 	"reflect"
 	"strconv"
 
-	"github.com/franklihub/gtags"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/gogf/gf/util/gvalid"
 )

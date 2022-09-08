@@ -1,0 +1,3 @@
+[submodule "gtags"]
+	path = gtags
+	url = git@github.com:franklihub/gtags.git
