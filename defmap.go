@@ -53,14 +53,14 @@ func tidyFieldDefVal(field *gtags.Field, dmap map[string]any) map[string]any {
 			delete(dmap, fieldalias)
 			ok = false
 		} else {
-			v = conv(field.Type().Kind(), v)
+			v, _ = convKind(field.Type().Kind(), v)
 			dmap[fieldalias] = v
 		}
 	}
 	if !ok {
 		v = field.Tags().Get(DefValTag).Val()
 		if v != "" {
-			v = conv(field.Type().Kind(), v)
+			v, _ = convKind(field.Type().Kind(), v)
 			dmap[fieldalias] = v
 		}
 	}

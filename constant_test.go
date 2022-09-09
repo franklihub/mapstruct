@@ -2,12 +2,22 @@ package gmapstruct
 
 import (
 	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/gogf/gf/util/gconv"
 )
 
 type HeartBeat int
 
-func (a *HeartBeat) UnmarshalJson(data []byte) error {
+func (a *HeartBeat) UnmarshalJSON(data []byte) error {
+	d := strings.TrimSpace(string(data))
+	d = strings.Trim(d, `"`)
+	if d == "off" {
+		*a = -1
+	} else {
+		*a = HeartBeat(gconv.Int(d))
+	}
 	return nil
 }
 
@@ -38,11 +48,9 @@ var cfgmap map[string]any = map[string]any{
 		"stdout": false,
 		"level":  "panic,error",
 	},
-	"db": map[string]any{
-		"addr": "localhost",
-		"port": 8888,
-		"pool": 10,
-	},
+	"addr":       "localhost",
+	"port":       8888,
+	"pool":       10,
 	"heart_beat": "10",
 }
 
