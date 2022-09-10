@@ -16,7 +16,8 @@ func tidyStructDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any 
 	////
 	//scan field, include anonstruct
 	for _, f := range stags.FieldNames() {
-		field := stags.FieldByName(f)
+		// field := stags.FieldByName(f)
+		field := stags.Field(f)
 		if v, ok := dmap[field.Alias()]; !ok {
 			dmap[field.Alias()] = field.Tags().Get(DefValTag).Val()
 		} else {

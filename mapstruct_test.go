@@ -20,7 +20,7 @@ func Test_ParserMap(t *testing.T) {
 	val2 := &Config{}
 	err = Map2Struct(val2, cfgmap)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, val.Heartbeat, HeartBeat(-1))
+	assert.Equal(t, val2.Heartbeat, HeartBeat(-1))
 
 	////
 }

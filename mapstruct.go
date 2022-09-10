@@ -29,7 +29,8 @@ func decodeToStruct(stags *gtags.Structs, obj any, dmap map[string]any) error {
 	// val := reflect.ValueOf(obj)
 	///
 	for _, fname := range stags.FieldNames() {
-		sf := stags.FieldByName(fname)
+		// sf := stags.FieldByName(fname)
+		sf := stags.Field(fname)
 		idx := sf.Index()
 		field := val.FieldByIndex(idx)
 		field.Type().Name()
