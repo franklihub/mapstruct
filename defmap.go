@@ -6,18 +6,20 @@ import (
 	"strings"
 )
 
-func TidyMapDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any {
+func TidyMapDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 	return tidyStructDefVal(stags, dmap)
 }
 
 var DefValTag = "d"
 
-func tidyStructDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any {
+func tidyStructDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 	////
 	//scan field, include anonstruct
-	for _, f := range stags.FieldNames() {
-		// field := stags.FieldByName(f)
-		field := stags.Field(f)
+	fields := []*gtags.Field{}
+	fields = append(fields, stags.Fields()...)
+	fields = append(fields, stags.AnonFields()...)
+
+	for _, field := range fields {
 		if v, ok := dmap[field.Alias()]; !ok {
 			dmap[field.Alias()] = field.Tags().Get(DefValTag).Val()
 		} else {
@@ -27,10 +29,10 @@ func tidyStructDefVal(stags *gtags.Structs, dmap map[string]any) map[string]any 
 		}
 	}
 	///scan nested
-	for _, f := range stags.NestedNames() {
-		nested := stags.NestedByName(f)
+	for _, nested := range stags.Nesteds() {
+		// nested := stags.NestedByName(f)
 		//todo: nested name
-		structname := nested.Alise()
+		structname := nested.Alias()
 		////
 		if v, ok := dmap[structname]; ok {
 			d := tidyStructDefVal(nested, v.(map[string]any))

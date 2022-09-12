@@ -17,7 +17,6 @@ func Test_DefMap(t *testing.T) {
 
 	req := &Config{}
 	stags := gtags.ParseStructTags(req)
-	// err := Map2Struct(req, data)
 	dmap = TidyMapDefVal(stags, dmap)
 	assert.Equal(t, dmap["name"], "cfgname")
 	assert.Equal(t, dmap["heart_beat"], "off")

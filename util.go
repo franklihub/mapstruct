@@ -28,12 +28,12 @@ func indirectVal(obj any) reflect.Value {
 func conv(field *gtags.Field, v any) (any, error) {
 	if field.HasUnmarshal() {
 		b, _ := json.Marshal(v)
-		val := reflect.New(field.FieldType())
+		val := reflect.New(field.Type())
 		dec := json.NewDecoder(bytes.NewBuffer(b))
 		err := dec.Decode(val)
 		return val, err
 	} else {
-		return convKind(field.FieldType().Kind(), v)
+		return convKind(field.Type().Kind(), v)
 	}
 
 }
