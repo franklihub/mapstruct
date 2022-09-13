@@ -6,6 +6,7 @@ import (
 	"gtags"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/gogf/gf/util/gconv"
 )
@@ -41,7 +42,15 @@ func conv(field *gtags.Field, v any) (any, error) {
 func convKind(kind reflect.Kind, v any) (any, error) {
 
 	switch kind {
-	case reflect.Int, reflect.Int64:
+	case reflect.Int:
+		if _, ok := v.(string); ok {
+			i, err := strconv.ParseInt(v.(string), 10, 0)
+			if err != nil {
+			} else {
+				v = int(i)
+			}
+		}
+	case reflect.Int64:
 		if _, ok := v.(string); ok {
 			i, err := strconv.ParseInt(v.(string), 10, 0)
 			if err != nil {
@@ -64,6 +73,10 @@ func convKind(kind reflect.Kind, v any) (any, error) {
 	case reflect.Bool:
 		v = gconv.Bool(v)
 	case reflect.String:
+	case reflect.Slice:
+		if _, ok := v.(string); ok {
+			v = strings.Split(v.(string), ",")
+		}
 	default:
 	}
 	return v, nil

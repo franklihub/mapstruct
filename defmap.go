@@ -2,7 +2,6 @@ package gmapstruct
 
 import (
 	"gtags"
-	"reflect"
 	"strings"
 )
 
@@ -21,7 +20,12 @@ func tidyStructDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 
 	for _, field := range fields {
 		if v, ok := dmap[field.Alias()]; !ok {
-			dmap[field.Alias()] = field.Tags().Get(DefValTag).Val()
+			d := field.Tags().Get(DefValTag).Val()
+			o := field.Tags().Get(DefValTag).Opts()
+			if len(o) > 0 {
+				d = d + "," + strings.Join(o, ",")
+			}
+			dmap[field.Alias()] = d
 		} else {
 			if _, ok := v.(string); ok {
 				dmap[field.Alias()] = strings.ToLower(v.(string))
@@ -38,35 +42,16 @@ func tidyStructDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 			d := tidyStructDefVal(nested, v.(map[string]any))
 			dmap[structname] = d
 		} else {
-			d := map[string]any{}
-			d = tidyStructDefVal(nested, d)
-			dmap[structname] = d
+			d := nested.Tags().Get(DefValTag).Val()
+			if d != "" {
+				dmap[structname] = d
+			} else {
+				d := map[string]any{}
+				d = tidyStructDefVal(nested, d)
+				dmap[structname] = d
+			}
 		}
 		//
 	}
-	return dmap
-}
-
-func tidyFieldDefVal(field *gtags.Field, dmap map[string]any) map[string]any {
-	fieldalias := field.Alias()
-
-	v, ok := dmap[fieldalias]
-	if ok {
-		if reflect.ValueOf(v).IsZero() {
-			delete(dmap, fieldalias)
-			ok = false
-		} else {
-			v, _ = convKind(field.Type().Kind(), v)
-			dmap[fieldalias] = v
-		}
-	}
-	if !ok {
-		v = field.Tags().Get(DefValTag).Val()
-		if v != "" {
-			v, _ = convKind(field.Type().Kind(), v)
-			dmap[fieldalias] = v
-		}
-	}
-
 	return dmap
 }

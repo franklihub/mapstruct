@@ -25,20 +25,29 @@ func Map2Struct(req any, dmap map[string]any) error {
 func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
 	//todo: need ptr
 	val := indirectVal(obj)
-	// typ := indirectType(obj)
-	// val := reflect.ValueOf(obj)
+	field := val.FieldByIndex(stags.Index())
+	//
+	if ok := gtags.TypMethod(field.Type(), "UnmarshalJSON"); ok {
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		enc.Encode(dmap)
+		///
+		err := json.Unmarshal(buf.Bytes(), field.Addr().Interface())
+		return err
+		//todo: error
+	}
 	///
-	for _, fname := range stags.FieldNames() {
-		// sf := stags.FieldByName(fname)
-		sf := stags.FieldByName(fname)
+	fields := []*gtags.Field{}
+	fields = append(fields, stags.Fields()...)
+	fields = append(fields, stags.AnonFields()...)
+	for _, sf := range fields {
 		idx := sf.Index()
 		field := val.FieldByIndex(idx)
-		field.Type().Name()
 		alias := sf.Alias()
 		v := dmap[alias]
 		///
-		nval := reflect.New(field.Type())
-		if method := nval.MethodByName("UnmarshalJSON"); method.IsValid() {
+		ok := gtags.TypMethod(field.Type(), "UnmarshalJSON")
+		if ok {
 			var buf bytes.Buffer
 			enc := json.NewEncoder(&buf)
 			enc.Encode(v)
@@ -46,17 +55,13 @@ func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
 
 			err := json.Unmarshal(buf.Bytes(), field.Addr().Interface())
 			if err != nil {
-				//todo: error
+				return err
 			}
 
 		} else {
 			cval, _ := convKind(field.Kind(), v)
-			if field.CanSet() {
-				field.Set(reflect.ValueOf(cval))
-			} else {
-				//todo: cannotset
-				panic("canot set")
-			}
+			//todo: cannotset
+			field.Set(reflect.ValueOf(cval))
 		}
 	}
 	///
@@ -65,11 +70,35 @@ func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
 		if nested.IsAnon() {
 			decodeToStruct(nested, obj, dmap)
 		} else {
-			smap := dmap[nested.Alias()].(map[string]any)
-			decodeToStruct(nested, obj, smap)
+			if v, ok := dmap[nested.Alias()]; ok {
+				if ok := tryDecode(obj, nested, v); !ok {
+					smap := v.(map[string]any)
+					decodeToStruct(nested, obj, smap)
+				}
+			}
 		}
 	}
 
 	///
 	return nil
+}
+
+func tryDecode(obj any, stags *gtags.Field, dmap any) bool {
+
+	val := indirectVal(obj)
+	field := val.FieldByIndex(stags.Index())
+	if ok := gtags.TypMethod(field.Type(), "UnmarshalJSON"); ok {
+		var buf bytes.Buffer
+		enc := json.NewEncoder(&buf)
+		enc.Encode(dmap)
+		///
+		err := json.Unmarshal(buf.Bytes(), field.Addr().Interface())
+		//todo: err
+		if err != nil {
+			panic(err)
+
+		}
+		return true
+	}
+	return false
 }
