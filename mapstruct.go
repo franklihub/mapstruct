@@ -13,13 +13,18 @@ import (
 func Map2Struct(req any, dmap map[string]any) error {
 
 	stags := gtags.ParseStructTags(req)
-
 	dmap = TidyMapDefVal(stags, dmap)
+	//
 	gerr := gvalid.CheckStructWithData(context.Background(), req, dmap, nil)
 	if gerr != nil {
 		return gerr
 	}
-	return decodeToStruct(stags, req, dmap)
+	b, err := json.Marshal(dmap)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, req)
+	// return decodeToStruct(stags, req, dmap)
 }
 
 func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
@@ -39,7 +44,7 @@ func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
 	///
 	fields := []*gtags.Field{}
 	fields = append(fields, stags.Fields()...)
-	fields = append(fields, stags.AnonFields()...)
+	// fields = append(fields, stags.AnonFields()...)
 	for _, sf := range fields {
 		idx := sf.Index()
 		field := val.FieldByIndex(idx)
@@ -62,6 +67,35 @@ func decodeToStruct(stags *gtags.Field, obj any, dmap map[string]any) error {
 			cval, _ := convKind(field.Kind(), v)
 			//todo: cannotset
 			field.Set(reflect.ValueOf(cval))
+		}
+	}
+	///anonnested
+	for _, sf := range stags.AnonNesteds() {
+		if sf.IsStruct() {
+			decodeToStruct(sf, obj, dmap)
+		} else {
+			idx := sf.Index()
+			alias := sf.Alias()
+			field := val.FieldByIndex(idx)
+			v := dmap[alias]
+			///
+			ok := gtags.TypMethod(field.Type(), "UnmarshalJSON")
+			if ok {
+				var buf bytes.Buffer
+				enc := json.NewEncoder(&buf)
+				enc.Encode(v)
+				///
+
+				err := json.Unmarshal(buf.Bytes(), field.Addr().Interface())
+				if err != nil {
+					return err
+				}
+
+			} else {
+				cval, _ := convKind(field.Kind(), v)
+				//todo: cannotset
+				field.Set(reflect.ValueOf(cval))
+			}
 		}
 	}
 	///

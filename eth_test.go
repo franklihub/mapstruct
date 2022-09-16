@@ -41,7 +41,10 @@ func Test_EthBlockNumberOrHash(t *testing.T) {
 	assert.Equal(t, ok, true)
 }
 func Test_EthRequest_DefVal(t *testing.T) {
-	val := &InTxRange{}
+	val := &InTxRange{
+		BlockHash: rpc.BlockNumberOrHashWithNumber(rpc.EarliestBlockNumber),
+		Kind:      []string{"erc20, erc721"},
+	}
 	dmap := map[string]any{}
 	err := Map2Struct(val, dmap)
 

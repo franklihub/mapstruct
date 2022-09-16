@@ -15,7 +15,7 @@ func Test_ParserMap(t *testing.T) {
 	assert.Equal(t, val.Port, 8888)
 	assert.Equal(t, val.Heartbeat, HeartBeat(10))
 	assert.Equal(t, val.Log.Stdout, false)
-	// assert.Equal(t, val.Log.Level, []{"panic","error"})
+	assert.Equal(t, val.Log.Level[0], "panic")
 	cfgmap["heart_beat"] = "off"
 	val2 := &Config{}
 	err = Map2Struct(val2, cfgmap)

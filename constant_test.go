@@ -24,7 +24,7 @@ func (a *HeartBeat) UnmarshalJSON(data []byte) error {
 type Log struct {
 	Stdout bool `json:"stdout" d:"true"`
 	//todo: slice
-	Level string `json:"level" d:"error,info,debug"`
+	Level []string `json:"level" d:"error,info,debug"`
 }
 
 type URL struct {
@@ -36,8 +36,8 @@ type Db struct {
 	Pool int `json:"pool" d:"10"`
 }
 type Config struct {
-	Name      string `json:"name" v:"required"`
-	Db        `json:"db"`
+	Name string `json:"name" v:"required"`
+	Db
 	Log       Log       `json:"log" v:"required"`
 	Heartbeat HeartBeat `json:"heart_beat" d:"off"`
 }
@@ -46,7 +46,7 @@ var cfgmap map[string]any = map[string]any{
 	"name": "cfgname",
 	"log": map[string]any{
 		"stdout": false,
-		"level":  "panic,error",
+		"level":  []string{"panic", "error"},
 	},
 	"addr":       "localhost",
 	"port":       8888,
