@@ -1,8 +1,10 @@
 package gmapstruct
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"gotest.tools/assert"
 )
 
@@ -23,4 +25,117 @@ func Test_ParserMap(t *testing.T) {
 	assert.Equal(t, val2.Heartbeat, HeartBeat(-1))
 
 	////
+}
+
+func Test_SliceString(t *testing.T) {
+	type slice struct {
+		Str []string `json:"str" d:"a,b,c"`
+	}
+	dmap := map[string]any{}
+
+	v := &slice{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, len(v.Str), 3)
+	assert.Equal(t, v.Str[0], "a")
+	//
+	dmap = map[string]any{
+		"str": []string{"aa", "bb"},
+	}
+	err = Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, len(v.Str), 2)
+	assert.Equal(t, v.Str[0], "aa")
+}
+func Test_SliceInt(t *testing.T) {
+	type slice struct {
+		Data []int `json:"str" d:"1,2,3"`
+	}
+	dmap := map[string]any{}
+
+	v := &slice{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err == nil, false)
+	// assert.Equal(t, len(v.Data), 3)
+	// assert.Equal(t, v.Data[0], 1)
+	//
+	dmap = map[string]any{
+		"str": []int{11, 22},
+	}
+	err = Map2Struct(v, dmap)
+	assert.Equal(t, err == nil, false)
+	// assert.Equal(t, len(v.Data), 2)
+	// assert.Equal(t, v.Data[0], 11)
+}
+
+func Test_Int(t *testing.T) {
+	type slice struct {
+		Data int `json:"data" d:"200"`
+	}
+	dmap := map[string]any{}
+
+	v := &slice{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, v.Data, 200)
+	//
+	dmap = map[string]any{
+		"data": "200",
+	}
+	err = Map2Struct(v, dmap)
+	es := strings.Split(err.Error(), ":")
+	assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal string into Go struct field slice.data of type int")
+	//
+	dmap = map[string]any{
+		"data": 300,
+	}
+	err = Map2Struct(v, dmap)
+	assert.Equal(t, v.Data, 300)
+}
+
+func Test_SliceDev(t *testing.T) {
+	type slice struct {
+		Data []string `json:"data" d:"a,b,c,d"`
+	}
+	dmap := map[string]any{}
+
+	v := &slice{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, len(v.Data), 4)
+	//
+	dmap = map[string]any{
+		"data": "e",
+	}
+	err = Map2Struct(v, dmap)
+	assert.Equal(t, err == nil, false)
+	// es := strings.Split(err.Error(), ":")
+	// assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal hex string without 0x prefix into Go struct field slice.data of type common.Address")
+}
+
+func Test_Address(t *testing.T) {
+	type slice struct {
+		Data common.Address `json:"data" d:"0x0000000000000000000000000000000000000000"`
+	}
+	dmap := map[string]any{}
+
+	v := &slice{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, v.Data, common.HexToAddress("0x0000000000000000000000000000000000000000"))
+	//
+	dmap = map[string]any{
+		"data": "0x7aa7f0528d551096463d60380139844f6d4a6ac2",
+	}
+	err = Map2Struct(v, dmap)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, v.Data, common.HexToAddress("0x7aa7f0528d551096463d60380139844f6d4a6ac2"))
+	///
+	//
+	dmap = map[string]any{
+		"data": "abcdedfd",
+	}
+	err = Map2Struct(v, dmap)
+	es := strings.Split(err.Error(), ":")
+	assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal hex string without 0x prefix into Go struct field slice.data of type common.Address")
 }
