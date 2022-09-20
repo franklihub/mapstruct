@@ -10,17 +10,13 @@ var DefValTag = "d"
 func TidyMapDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 	sdmap := stags.DMap(DefValTag)
 	gtags.MergerMap(dmap, sdmap)
-	// tidyStructDefVal(stags, dmap)
-	// fmt.Println("dmap:", dmap)
 	return dmap
 }
 
 func tidyStructDefVal(stags *gtags.Field, dmap map[string]any) map[string]any {
 	////
-	//scan field, include anonstruct
 	fields := []*gtags.Field{}
 	fields = append(fields, stags.Fields()...)
-	// fields = append(fields, stags.AnonFields()...)
 
 	for _, field := range fields {
 		if v, ok := dmap[field.Alias()]; !ok {

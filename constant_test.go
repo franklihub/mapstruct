@@ -49,8 +49,8 @@ var cfgmap map[string]any = map[string]any{
 		"level":  []string{"panic", "error"},
 	},
 	"addr":       "localhost",
-	"port":       8888,
-	"pool":       10,
+	"port":       "8888",
+	"pool":       "10",
 	"heart_beat": "10",
 }
 

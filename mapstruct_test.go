@@ -55,17 +55,17 @@ func Test_SliceInt(t *testing.T) {
 
 	v := &slice{}
 	err := Map2Struct(v, dmap)
-	assert.Equal(t, err == nil, false)
-	// assert.Equal(t, len(v.Data), 3)
-	// assert.Equal(t, v.Data[0], 1)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, len(v.Data), 3)
+	assert.Equal(t, v.Data[0], 1)
 	//
 	dmap = map[string]any{
-		"str": []int{11, 22},
+		"str": []string{"11", "22"},
 	}
 	err = Map2Struct(v, dmap)
-	assert.Equal(t, err == nil, false)
-	// assert.Equal(t, len(v.Data), 2)
-	// assert.Equal(t, v.Data[0], 11)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, len(v.Data), 2)
+	assert.Equal(t, v.Data[0], 11)
 }
 
 func Test_Int(t *testing.T) {
@@ -83,11 +83,11 @@ func Test_Int(t *testing.T) {
 		"data": "200",
 	}
 	err = Map2Struct(v, dmap)
-	es := strings.Split(err.Error(), ":")
-	assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal string into Go struct field slice.data of type int")
+	assert.Equal(t, err, nil)
+	assert.Equal(t, v.Data, 200)
 	//
 	dmap = map[string]any{
-		"data": 300,
+		"data": "300",
 	}
 	err = Map2Struct(v, dmap)
 	assert.Equal(t, v.Data, 300)
@@ -105,12 +105,11 @@ func Test_SliceDev(t *testing.T) {
 	assert.Equal(t, len(v.Data), 4)
 	//
 	dmap = map[string]any{
-		"data": "e",
+		"data": []string{"e"},
 	}
 	err = Map2Struct(v, dmap)
-	assert.Equal(t, err == nil, false)
-	// es := strings.Split(err.Error(), ":")
-	// assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal hex string without 0x prefix into Go struct field slice.data of type common.Address")
+	assert.Equal(t, err, nil)
+	assert.Equal(t, v.Data[0], "e")
 }
 
 func Test_Address(t *testing.T) {
@@ -136,6 +135,17 @@ func Test_Address(t *testing.T) {
 		"data": "abcdedfd",
 	}
 	err = Map2Struct(v, dmap)
+	assert.Equal(t, err == nil, false)
 	es := strings.Split(err.Error(), ":")
-	assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal hex string without 0x prefix into Go struct field slice.data of type common.Address")
+	assert.Equal(t, strings.TrimSpace(es[1]), "cannot unmarshal hex string without 0x prefix into Go value of type common.Address")
+}
+func Test_NonPointer(t *testing.T) {
+	type nonPointer struct {
+		Data string
+	}
+	dmap := map[string]any{}
+
+	v := nonPointer{}
+	err := Map2Struct(v, dmap)
+	assert.Equal(t, err.Error(), "non-pointer gmapstruct.nonPointer")
 }
