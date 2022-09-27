@@ -86,6 +86,9 @@ func tidyVal(filed *gtags.Field, dval any) any {
 			s = strings.ToLower(s)
 			slice := strings.Split(s, ",")
 			if slice[0] != "" {
+				for i, s := range slice {
+					slice[i] = strings.TrimSpace(s)
+				}
 				return slice
 			} else {
 				return []string{}
