@@ -149,3 +149,15 @@ func Test_NonPointer(t *testing.T) {
 	err := Map2Struct(v, dmap)
 	assert.Equal(t, err.Error(), "non-pointer gmapstruct.nonPointer")
 }
+
+func Test_Vtype(t *testing.T) {
+	type conf struct {
+		TimeOut int      `json:"time_out" d:"100"`
+		Type    []string `json:"type" p:"type" d:"a,b,c" v:"in:a,b,c,d"`
+	}
+
+	v := conf{}
+	dmap := map[string]any{}
+	err := Map2Struct(&v, dmap)
+	assert.Equal(t, err != nil, true)
+}

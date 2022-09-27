@@ -25,3 +25,16 @@ func Test_DefMap(t *testing.T) {
 	assert.Equal(t, dmap["addr"], "url")
 	assert.Equal(t, dmap["port"], "777")
 }
+func Test_DefMap2(t *testing.T) {
+	dmap := map[string]any{
+		"name": "cfgname",
+		"log": map[string]any{
+			"level": "error",
+		},
+	}
+
+	req := &Config{}
+	stags := gtags.ParseStructTags(req)
+	dmap = TidyMapDefVal(stags, dmap)
+	assert.Equal(t, dmap["log"].(map[string]any)["level"].([]string)[0], "error")
+}
