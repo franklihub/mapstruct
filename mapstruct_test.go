@@ -1,10 +1,14 @@
 package gmapstruct
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/gogf/gf/util/gvalid"
 	"gotest.tools/assert"
 )
 
@@ -150,14 +154,62 @@ func Test_NonPointer(t *testing.T) {
 	assert.Equal(t, err.Error(), "non-pointer gmapstruct.nonPointer")
 }
 
-func Test_Vtype(t *testing.T) {
+func Test_VType(t *testing.T) {
 	type conf struct {
 		TimeOut int      `json:"time_out" d:"100"`
-		Type    []string `json:"type" p:"type" d:"a,b,c" v:"in:a,b,c,d"`
+		Type    []string `json:"type" p:"type" d:"a,b,c" v:"sliceinstr:a,b,c,d"`
 	}
+
+	rule := "sliceinstr"
+	gvalid.RegisterRule(rule, SliceInStr)
 
 	v := conf{}
 	dmap := map[string]any{}
 	err := Map2Struct(&v, dmap)
-	assert.Equal(t, err != nil, true)
+	assert.Equal(t, err, nil)
+}
+func Test_VTypeErr(t *testing.T) {
+	type conf struct {
+		TimeOut int      `json:"time_out" d:"100"`
+		Type    []string `json:"type" p:"type" d:"ec" v:"sliceinstr:a,b,c,d"`
+	}
+
+	rule := "sliceinstr"
+	gvalid.RegisterRule(rule, SliceInStr)
+
+	v := conf{}
+	dmap := map[string]any{}
+	err := Map2Struct(&v, dmap)
+	assert.Equal(t, err == nil, false)
+}
+func SliceInStr(ctx context.Context, rule string, value interface{}, message string, data interface{}) error {
+	rules := strings.Split(rule, ":")
+	if len(rules) != 2 {
+		return errors.New("Invalid rule:" + rule)
+	}
+	slices := strings.Split(strings.Trim(rules[1], " "), ",")
+	if len(slices) == 0 {
+		return errors.New("Invalid rule:" + rule)
+	}
+	if slices[1] == "" {
+		return errors.New("Invalid rule:" + rule)
+	}
+	////
+	values, ok := value.([]string)
+	if !ok {
+		return errors.New(fmt.Sprint("Invalid SliceIn val:", value))
+	}
+	for _, val := range values {
+		match := false
+		for _, ruleval := range slices {
+			if val == ruleval {
+				match = true
+				break
+			}
+		}
+		if !match {
+			return errors.New("The :attribute value is invalid")
+		}
+	}
+	return nil
 }
